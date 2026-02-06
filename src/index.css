@@ -1,0 +1,99 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* 1. Global Reset - No Scrollbar Visual */
+html,
+body,
+#root,
+ion-app {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #f9fafb;
+}
+
+/* Sembunyikan garis scrollbar di semua browser tapi tetap bisa scroll */
+* {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    box-sizing: border-box;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+/* 2. Fix Kartu Dimensi (The "Agamis" Center Fix) */
+.dimensi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    /* Paksa 3 kolom */
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+.dimensi-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    /* Rata tengah horizontal */
+    justify-content: center !important;
+    /* Rata tengah vertikal */
+    text-align: center !important;
+    padding: 12px 4px !important;
+    min-height: 110px !important;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Fix Icon & Text di dalam Card */
+.dimensi-card .icon-wrapper {
+    margin-bottom: 8px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dimensi-card span {
+    display: block !important;
+    width: 100% !important;
+    font-size: 0.75rem !important;
+    /* Ukuran font mobile */
+    line-height: 1.2 !important;
+    font-weight: 600 !important;
+    color: #374151;
+    /* Mencegah teks kepotong aneh */
+    word-wrap: break-word;
+    white-space: normal !important;
+}
+
+@media (min-width: 768px) {
+    .dimensi-card span {
+        font-size: 0.9rem !important;
+    }
+
+    .dimensi-grid {
+        gap: 20px !important;
+    }
+}
+
+/* 3. Action Sheet & Ionic Overrides */
+.ion-page {
+    display: flex !important;
+    flex-direction: column !important;
+    position: absolute !important;
+    contain: none !important;
+}
+
+/* CSS untuk membuat Toast melengkung */
+.custom-toast {
+    --border-radius: 12px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
