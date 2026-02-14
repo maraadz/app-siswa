@@ -21,6 +21,7 @@ import {
   getPerencanaan,
   getPsikologi,
   getPsikologiDetail,
+  updatePsikologi,
   getPlacement,
   getPlacementDetail,
   updateCitaCita,
@@ -190,12 +191,21 @@ const RencanaBelajarPage: React.FC<Props> = ({ studentData }) => {
   const handleShowPsikologiDetail = async (p: any) => {
     try {
       const response = await getPsikologiDetail(p.IDPSIKOLOGI);
-      const data = response.data?.data || response.data || response;
+      const data =
+        response?.data?.data ??
+        response?.data ??
+        response ??
+        {};
 
       setPsikologiForm(data);
 
+      setDetailData({
+        info: p,
+        data: data
+      });
+
       // 🔥 PARSE KEMAMPUAN KHUSUS
-      if (data.KEMAMPUAN_KHUSUS) {
+      if (data?.KEMAMPUAN_KHUSUS?.length > 0) {
         const parsed = data.KEMAMPUAN_KHUSUS.split(';').map((item: string) => {
           const [aspek, rankPart, ketPart] = item.split('~');
           return {
@@ -208,7 +218,7 @@ const RencanaBelajarPage: React.FC<Props> = ({ studentData }) => {
       }
 
       // 🔥 PARSE KEPRIBADIAN
-      if (data.KEPRIBADIAN) {
+      if (data?.KEPRIBADIAN?.length > 0) {
         const parsed = data.KEPRIBADIAN.split(';').map((item: string) => {
           const [aspek, rankPart, ketPart] = item.split('~');
           return {
@@ -227,6 +237,33 @@ const RencanaBelajarPage: React.FC<Props> = ({ studentData }) => {
       present({ message: 'Gagal memuat analisis psikologi', color: 'danger', duration: 2000 });
     }
   };
+
+  const handleUpdatePsikologi = async () => {
+    try {
+      setSaving(true);
+
+      await updatePsikologi(detailData.info.IDPSIKOLOGI, psikologiForm);
+
+      present({
+        message: 'Data psikologi berhasil diperbarui',
+        color: 'success',
+        duration: 2000
+      });
+
+      setShowDetailModal(false);
+      loadAllData();
+
+    } catch (err) {
+      present({
+        message: 'Gagal menyimpan perubahan',
+        color: 'danger',
+        duration: 2000
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   const handleViewPsikologiFile = async (p: any) => {
     if (!p.FILE_HASIL) {
@@ -626,7 +663,16 @@ const RencanaBelajarPage: React.FC<Props> = ({ studentData }) => {
       </IonModal>
 
       {/* 3. MODAL DETAIL (DYNAMIC CONTENT) */}
-      <IonModal isOpen={showDetailModal} onDidDismiss={() => setShowDetailModal(false)}>
+      <IonModal
+        isOpen={showDetailModal}
+        onDidDismiss={() => {
+          setShowDetailModal(false);
+          setPsikologiForm(null);
+          setKemampuanList([]);
+          setKepribadianList([]);
+          setDetailData(null);
+        }}
+      >
         <IonHeader className="ion-no-border">
           <IonToolbar style={{ '--padding-top': '12px' }}>
             <IonTitle className="font-black text-[10px] uppercase tracking-[0.3em] text-emerald-600">
@@ -639,7 +685,7 @@ const RencanaBelajarPage: React.FC<Props> = ({ studentData }) => {
           <div className="bg-white p-6 rounded-[2rem] mb-6 shadow-sm flex justify-between items-center border border-emerald-100">
             <div>
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Petugas Penilai</p>
-              <p className="text-base font-black text-gray-800 uppercase tracking-tight">{detailData?.info.NAMA_PENGASUH || detailData?.info.NAMA_PENGUJI || detailData?.info.NAMA_PSIOLOG || 'Staff Terkait'}</p>
+              <p className="text-base font-black text-gray-800 uppercase tracking-tight">{detailData?.info.NAMA_PENGASUH || detailData?.info.NAMA_PENGUJI || detailData?.info.NAMA_PSIKOLOG || 'Staff Terkait'}</p>
             </div>
             <button onClick={handlePrint} className="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-black text-[10px] uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 active:scale-90 transition-all">
               <IonIcon icon={printOutline} /> CETAK
@@ -647,365 +693,377 @@ const RencanaBelajarPage: React.FC<Props> = ({ studentData }) => {
           </div>
 
           {detailData?.data && (
-            modalType === 'psikologi' && psikologiForm ? (
+            modalType === 'psikologi' && detailData?.data && psikologiForm ? (
 
-<div className="space-y-8">
+              <div className="space-y-8">
 
-  {/* ================= SECTION 1: DATA UTAMA ================= */}
-  <div className="bg-white p-6 rounded-3xl border border-indigo-100 shadow-sm space-y-4">
+                {/* ================= SECTION 1: DATA UTAMA ================= */}
+                <div className="bg-white p-6 rounded-3xl border border-indigo-100 shadow-sm space-y-4">
 
-    <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest">
-      Data Utama Psikologi
-    </h3>
+                  <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest">
+                    Data Utama Psikologi
+                  </h3>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-      <IonInput
-        label="IQ"
-        labelPlacement="stacked"
-        value={psikologiForm.IQ}
-        onIonInput={(e) =>
-          setPsikologiForm({ ...psikologiForm, IQ: e.detail.value })
-        }
-      />
+                    <IonInput
+                      label="IQ"
+                      labelPlacement="stacked"
+                      value={psikologiForm?.IQ || ''}
+                      onIonInput={(e) =>
+                        setPsikologiForm({ ...psikologiForm, IQ: e.detail.value })
+                      }
+                    />
 
-      <IonInput
-        label="Kategori"
-        labelPlacement="stacked"
-        value={psikologiForm.KATEGORI}
-        onIonInput={(e) =>
-          setPsikologiForm({ ...psikologiForm, KATEGORI: e.detail.value })
-        }
-      />
+                    <IonInput
+                      label="Kategori"
+                      labelPlacement="stacked"
+                      value={psikologiForm?.KATEGORI || ''}
+                      onIonInput={(e) =>
+                        setPsikologiForm({ ...psikologiForm, KATEGORI: e.detail.value })
+                      }
+                    />
 
-      <IonTextarea
-        label="Minat"
-        labelPlacement="stacked"
-        rows={3}
-        value={psikologiForm.MINAT}
-        onIonInput={(e) =>
-          setPsikologiForm({ ...psikologiForm, MINAT: e.detail.value })
-        }
-      />
+                    <IonTextarea
+                      label="Minat"
+                      labelPlacement="stacked"
+                      rows={3}
+                      value={psikologiForm?.MINAT || ''}
+                      onIonInput={(e) =>
+                        setPsikologiForm({ ...psikologiForm, MINAT: e.detail.value })
+                      }
+                    />
 
-      <IonTextarea
-        label="Gaya Belajar"
-        labelPlacement="stacked"
-        rows={3}
-        value={psikologiForm.GAYA_BELAJAR}
-        onIonInput={(e) =>
-          setPsikologiForm({ ...psikologiForm, GAYA_BELAJAR: e.detail.value })
-        }
-      />
+                    <IonTextarea
+                      label="Gaya Belajar"
+                      labelPlacement="stacked"
+                      rows={3}
+                      value={psikologiForm?.GAYA_BELAJAR || ''}
+                      onIonInput={(e) =>
+                        setPsikologiForm({ ...psikologiForm, GAYA_BELAJAR: e.detail.value })
+                      }
+                    />
 
-      <div className="col-span-full">
-        <IonTextarea
-          label="Kesimpulan"
-          labelPlacement="stacked"
-          rows={4}
-          value={psikologiForm.KESIMPULAN}
-          onIonInput={(e) =>
-            setPsikologiForm({ ...psikologiForm, KESIMPULAN: e.detail.value })
-          }
-        />
-      </div>
-
-    </div>
-  </div>
-
-
-  {/* ================= SECTION 2: KEMAMPUAN KHUSUS ================= */}
-  <div className="bg-white p-6 rounded-3xl border border-emerald-100 shadow-sm">
-
-    <h3 className="text-sm font-black text-emerald-600 uppercase tracking-widest mb-4">
-      Kemampuan Khusus
-    </h3>
-
-    <table className="w-full text-xs">
-      <thead className="bg-emerald-50">
-        <tr>
-          <th className="p-2 text-left">Aspek</th>
-          <th className="p-2 text-center">Rank</th>
-          <th className="p-2 text-center">Kategori</th>
-        </tr>
-      </thead>
-      <tbody>
-        {kemampuanList.map((item, i) => (
-          <tr key={i} className="border-t">
-            <td className="p-2">{item.aspek}</td>
-            <td className="p-2 text-center">
-              <IonInput
-                value={item.rank}
-                onIonInput={(e) => {
-                  const updated = [...kemampuanList];
-                  updated[i].rank = e.detail.value;
-                  setKemampuanList(updated);
-                }}
-              />
-            </td>
-            <td className="p-2 text-center">
-              <IonInput
-                value={item.keterangan}
-                onIonInput={(e) => {
-                  const updated = [...kemampuanList];
-                  updated[i].keterangan = e.detail.value;
-                  setKemampuanList(updated);
-                }}
-              />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-  </div>
-
-
-  {/* ================= SECTION 3: KEPRIBADIAN ================= */}
-  <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm">
-
-    <h3 className="text-sm font-black text-amber-600 uppercase tracking-widest mb-4">
-      Profil Kepribadian
-    </h3>
-
-    <table className="w-full text-xs">
-      <thead className="bg-amber-50">
-        <tr>
-          <th className="p-2 text-left">Aspek</th>
-          <th className="p-2 text-center">Skor</th>
-          <th className="p-2 text-center">Kategori</th>
-        </tr>
-      </thead>
-      <tbody>
-        {kepribadianList.map((item, i) => (
-          <tr key={i} className="border-t">
-            <td className="p-2">{item.aspek}</td>
-            <td className="p-2 text-center">
-              <IonInput
-                value={item.rank}
-                onIonInput={(e) => {
-                  const updated = [...kepribadianList];
-                  updated[i].rank = e.detail.value;
-                  setKepribadianList(updated);
-                }}
-              />
-            </td>
-            <td className="p-2 text-center">
-              <IonInput
-                value={item.keterangan}
-                onIonInput={(e) => {
-                  const updated = [...kepribadianList];
-                  updated[i].keterangan = e.detail.value;
-                  setKepribadianList(updated);
-                }}
-              />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-  </div>
-
-</div>
-
-)
- : modalType === 'placement' && Array.isArray(detailData.data) ? (
-
-              (() => {
-
-                const orderedDimensi = [
-                  'AGAMIS',
-                  'QURANI',
-                  'PEMIMPIN NEGARAWAN',
-                  'SAINTIS',
-                  "4 C'S",
-                  'MULTILINGUAL',
-                  'PRESTASI'
-                ];
-
-                const normalize = (val: string) =>
-                  val?.toUpperCase().replace(/\s+/g, ' ').trim();
-
-                const grouped = detailData.data.reduce((acc: any, item: any) => {
-                  const key = normalize(item.DIMENSI);
-                  if (!acc[key]) acc[key] = [];
-                  acc[key].push(item);
-                  return acc;
-                }, {});
-
-                return (
-                  <div className="space-y-12">
-
-                    {orderedDimensi.map((dim) => {
-
-                      const dimKey = normalize(dim);
-                      if (!grouped[dimKey]) return null;
-
-                      const isYesNoDimensi = [
-                        'QURANI',
-                        'PEMIMPIN NEGARAWAN',
-                        'MULTILINGUAL'
-                      ].includes(dimKey);
-
-                      return (
-                        <div key={dim}>
-
-                          {/* HEADER DIMENSI */}
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-2.5 h-8 bg-emerald-600 rounded-full"></div>
-                            <h3 className="text-base font-extrabold text-emerald-700 uppercase tracking-wider">
-                              {dim}
-                            </h3>
-                          </div>
-
-                          <div className="bg-white rounded-3xl shadow-md border border-emerald-100 overflow-hidden">
-
-                            <table className="w-full text-xs md:text-sm table-auto">
-
-                              <thead className="bg-emerald-600 text-white text-[11px] uppercase tracking-wide">
-                                <tr>
-                                  <th className="p-3 text-center w-10">No</th>
-                                  <th className="p-3 text-left">Sub Dimensi</th>
-                                  <th className="p-3 text-left">Standar Input</th>
-                                  <th className="p-3 text-center w-20">Nilai</th>
-                                  <th className="p-3 text-center w-24">Tercapai</th>
-                                </tr>
-                              </thead>
-
-                              <tbody className="divide-y divide-gray-100 bg-white">
-
-                                {grouped[dimKey].map((item: any, idx: number) => {
-
-                                  let rawNilai = item.HASIL ?? item.NILAI ?? '-';
-                                  let nilaiDisplay = rawNilai;
-
-                                  // 🔥 Special rule untuk Qurani, Pemimpin Negarawan, Multilingual
-                                  if (isYesNoDimensi) {
-                                    if (rawNilai === '1' || rawNilai === 1) nilaiDisplay = 'Tidak';
-                                    if (rawNilai === '2' || rawNilai === 2) nilaiDisplay = 'Ya';
-                                  }
-
-                                  const tercapai =
-                                    item.STATUS === 'LULUS'
-                                      ? 'Sudah'
-                                      : item.STATUS === 'KURANG'
-                                        ? 'Belum'
-                                        : item.MEMENUHI === '1'
-                                          ? 'Sudah'
-                                          : 'Belum';
-
-                                  return (
-                                    <tr key={idx} className="hover:bg-emerald-50 transition-all duration-200">
-
-                                      <td className="p-3 text-center font-semibold text-gray-500">
-                                        {idx + 1}
-                                      </td>
-
-                                      <td className="p-3 font-semibold text-gray-800">
-                                        {item.SUB_DIMENSI || '-'}
-                                      </td>
-
-                                      <td className="p-3 text-gray-600 leading-relaxed">
-                                        {item.STANDAR_INPUT || '-'}
-                                      </td>
-
-                                      <td className="p-3 text-center">
-
-                                        {isYesNoDimensi ? (
-                                          nilaiDisplay === 'Ya' ? (
-                                            <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">
-                                              Ya
-                                            </span>
-                                          ) : (
-                                            <span className="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-xs font-bold">
-                                              Tidak
-                                            </span>
-                                          )
-                                        ) : (
-                                          <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">
-                                            {nilaiDisplay}
-                                          </span>
-                                        )}
-
-                                      </td>
-
-                                      <td className="p-3 text-center">
-                                        {tercapai === 'Sudah' ? (
-                                          <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                                            Sudah
-                                          </span>
-                                        ) : (
-                                          <span className="bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                                            Belum
-                                          </span>
-                                        )}
-                                      </td>
-
-                                    </tr>
-                                  );
-                                })}
-
-                              </tbody>
-
-                            </table>
-
-                          </div>
-
-                        </div>
-                      );
-
-                    })}
+                    <div className="col-span-full">
+                      <IonTextarea
+                        label="Kesimpulan"
+                        labelPlacement="stacked"
+                        rows={4}
+                        value={psikologiForm?.KESIMPULAN || ''}
+                        onIonInput={(e) =>
+                          setPsikologiForm({ ...psikologiForm, KESIMPULAN: e.detail.value })
+                        }
+                      />
+                    </div>
 
                   </div>
-                );
+                </div>
 
-              })()
+
+                {/* ================= SECTION 2: KEMAMPUAN KHUSUS ================= */}
+                <div className="bg-white p-6 rounded-3xl border border-emerald-100 shadow-sm">
+
+                  <h3 className="text-sm font-black text-emerald-600 uppercase tracking-widest mb-4">
+                    Kemampuan Khusus
+                  </h3>
+
+                  <table className="w-full text-xs">
+                    <thead className="bg-emerald-50">
+                      <tr>
+                        <th className="p-2 text-left">Aspek</th>
+                        <th className="p-2 text-center">Rank</th>
+                        <th className="p-2 text-center">Kategori</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {kemampuanList.map((item, i) => (
+                        <tr key={i} className="border-t">
+                          <td className="p-2">{item.aspek}</td>
+                          <td className="p-2 text-center">
+                            <IonInput
+                              value={item.rank}
+                              onIonInput={(e) => {
+                                const updated = [...kemampuanList];
+                                updated[i].rank = e.detail.value;
+                                setKemampuanList(updated);
+                              }}
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <IonInput
+                              value={item.keterangan}
+                              onIonInput={(e) => {
+                                const updated = [...kemampuanList];
+                                updated[i].keterangan = e.detail.value;
+                                setKemampuanList(updated);
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                </div>
+
+
+                {/* ================= SECTION 3: KEPRIBADIAN ================= */}
+                <div className="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm">
+
+                  <h3 className="text-sm font-black text-amber-600 uppercase tracking-widest mb-4">
+                    Profil Kepribadian
+                  </h3>
+
+                  <table className="w-full text-xs">
+                    <thead className="bg-amber-50">
+                      <tr>
+                        <th className="p-2 text-left">Aspek</th>
+                        <th className="p-2 text-center">Skor</th>
+                        <th className="p-2 text-center">Kategori</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {kepribadianList.map((item, i) => (
+                        <tr key={i} className="border-t">
+                          <td className="p-2">{item.aspek}</td>
+                          <td className="p-2 text-center">
+                            <IonInput
+                              value={item.rank}
+                              onIonInput={(e) => {
+                                const updated = [...kepribadianList];
+                                updated[i].rank = e.detail.value;
+                                setKepribadianList(updated);
+                              }}
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <IonInput
+                              value={item.keterangan}
+                              onIonInput={(e) => {
+                                const updated = [...kepribadianList];
+                                updated[i].keterangan = e.detail.value;
+                                setKepribadianList(updated);
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                </div>
+                {/* ================= BUTTON SIMPAN ================= */}
+                <div className="pt-6">
+                  <IonButton
+                    expand="block"
+                    className="font-black h-14"
+                    style={{ '--border-radius': '1.5rem', '--background': '#10b981' }}
+                    onClick={handleUpdatePsikologi}
+                    disabled={saving}
+                  >
+                    {saving ? 'MENYIMPAN...' : 'SIMPAN PERUBAHAN'}
+                  </IonButton>
+                </div>
+
+              </div>
 
             )
-              : (
-                // Handle RENCANA dan CAPAIAN (Grouped by Dimension)
-                Object.entries(detailData.data || {}).map(([dimensi, content]: [string, any], dIdx) => (
-                  <div key={dimensi} className="mb-8 animate__animated animate__fadeInUp" style={{ animationDelay: `${dIdx * 0.1}s` }}>
-                    <div className="flex items-center gap-3 mb-4 ml-3">
-                      <div className="w-2.5 h-8 bg-emerald-500 rounded-full shadow-sm shadow-emerald-200"></div>
-                      <h3 className="text-sm font-black text-gray-800 uppercase tracking-tighter">{dimensi}</h3>
+              : modalType === 'placement' && Array.isArray(detailData.data) ? (
+
+                (() => {
+
+                  const orderedDimensi = [
+                    'AGAMIS',
+                    'QURANI',
+                    'PEMIMPIN NEGARAWAN',
+                    'SAINTIS',
+                    "4 C'S",
+                    'MULTILINGUAL',
+                    'PRESTASI'
+                  ];
+
+                  const normalize = (val: string) =>
+                    val?.toUpperCase().replace(/\s+/g, ' ').trim();
+
+                  const grouped = detailData.data.reduce((acc: any, item: any) => {
+                    const key = normalize(item.DIMENSI);
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(item);
+                    return acc;
+                  }, {});
+
+                  return (
+                    <div className="space-y-12">
+
+                      {orderedDimensi.map((dim) => {
+
+                        const dimKey = normalize(dim);
+                        if (!grouped[dimKey]) return null;
+
+                        const isYesNoDimensi = [
+                          'QURANI',
+                          'PEMIMPIN NEGARAWAN',
+                          'MULTILINGUAL'
+                        ].includes(dimKey);
+
+                        return (
+                          <div key={dim}>
+
+                            {/* HEADER DIMENSI */}
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="w-2.5 h-8 bg-emerald-600 rounded-full"></div>
+                              <h3 className="text-base font-extrabold text-emerald-700 uppercase tracking-wider">
+                                {dim}
+                              </h3>
+                            </div>
+
+                            <div className="bg-white rounded-3xl shadow-md border border-emerald-100 overflow-hidden">
+
+                              <table className="w-full text-xs md:text-sm table-auto">
+
+                                <thead className="bg-emerald-600 text-white text-[11px] uppercase tracking-wide">
+                                  <tr>
+                                    <th className="p-3 text-center w-10">No</th>
+                                    <th className="p-3 text-left">Sub Dimensi</th>
+                                    <th className="p-3 text-left">Standar Input</th>
+                                    <th className="p-3 text-center w-20">Nilai</th>
+                                    <th className="p-3 text-center w-24">Tercapai</th>
+                                  </tr>
+                                </thead>
+
+                                <tbody className="divide-y divide-gray-100 bg-white">
+
+                                  {grouped[dimKey].map((item: any, idx: number) => {
+
+                                    let rawNilai = item.HASIL ?? item.NILAI ?? '-';
+                                    let nilaiDisplay = rawNilai;
+
+                                    // 🔥 Special rule untuk Qurani, Pemimpin Negarawan, Multilingual
+                                    if (isYesNoDimensi) {
+                                      if (rawNilai === '1' || rawNilai === 1) nilaiDisplay = 'Tidak';
+                                      if (rawNilai === '2' || rawNilai === 2) nilaiDisplay = 'Ya';
+                                    }
+
+                                    const tercapai =
+                                      item.STATUS === 'LULUS'
+                                        ? 'Sudah'
+                                        : item.STATUS === 'KURANG'
+                                          ? 'Belum'
+                                          : item.MEMENUHI === '1'
+                                            ? 'Sudah'
+                                            : 'Belum';
+
+                                    return (
+                                      <tr key={idx} className="hover:bg-emerald-50 transition-all duration-200">
+
+                                        <td className="p-3 text-center font-semibold text-gray-500">
+                                          {idx + 1}
+                                        </td>
+
+                                        <td className="p-3 font-semibold text-gray-800">
+                                          {item.SUB_DIMENSI || '-'}
+                                        </td>
+
+                                        <td className="p-3 text-gray-600 leading-relaxed">
+                                          {item.STANDAR_INPUT || '-'}
+                                        </td>
+
+                                        <td className="p-3 text-center">
+
+                                          {isYesNoDimensi ? (
+                                            nilaiDisplay === 'Ya' ? (
+                                              <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">
+                                                Ya
+                                              </span>
+                                            ) : (
+                                              <span className="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-xs font-bold">
+                                                Tidak
+                                              </span>
+                                            )
+                                          ) : (
+                                            <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">
+                                              {nilaiDisplay}
+                                            </span>
+                                          )}
+
+                                        </td>
+
+                                        <td className="p-3 text-center">
+                                          {tercapai === 'Sudah' ? (
+                                            <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                                              Sudah
+                                            </span>
+                                          ) : (
+                                            <span className="bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                                              Belum
+                                            </span>
+                                          )}
+                                        </td>
+
+                                      </tr>
+                                    );
+                                  })}
+
+                                </tbody>
+
+                              </table>
+
+                            </div>
+
+                          </div>
+                        );
+
+                      })}
+
                     </div>
-                    <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100">
-                      <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50/80 font-black text-gray-400 uppercase text-[9px] tracking-widest">
-                          <tr>
-                            <th className="p-5 min-w-[200px]">Uraian Perencanaan</th>
-                            <th className="p-5 text-center">Target</th>
-                            {modalType === 'capaian' && <th className="p-5 text-center bg-emerald-50/30">Realisasi</th>}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                          {(content.main || []).map((item: any, idx: number) => (
-                            <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
-                              <td className="p-5 font-bold text-gray-700 leading-snug">
-                                {item.PERENCANAAN_BELAJAR || item.SUB_DIMENSI || item.URAIAN || 'Data tidak tersedia'}
-                              </td>
-                              <td className="p-5 text-center">
-                                <span className="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl font-black shadow-inner">
-                                  {item.NILAI_TARGET ?? item.TARGET ?? '-'}
-                                </span>
-                              </td>
-                              {modalType === 'capaian' && (
+                  );
+
+                })()
+
+              )
+                : (
+                  // Handle RENCANA dan CAPAIAN (Grouped by Dimension)
+                  Object.entries(detailData.data || {}).map(([dimensi, content]: [string, any], dIdx) => (
+                    <div key={dimensi} className="mb-8 animate__animated animate__fadeInUp" style={{ animationDelay: `${dIdx * 0.1}s` }}>
+                      <div className="flex items-center gap-3 mb-4 ml-3">
+                        <div className="w-2.5 h-8 bg-emerald-500 rounded-full shadow-sm shadow-emerald-200"></div>
+                        <h3 className="text-sm font-black text-gray-800 uppercase tracking-tighter">{dimensi}</h3>
+                      </div>
+                      <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-gray-50/80 font-black text-gray-400 uppercase text-[9px] tracking-widest">
+                            <tr>
+                              <th className="p-5 min-w-[200px]">Uraian Perencanaan</th>
+                              <th className="p-5 text-center">Target</th>
+                              {modalType === 'capaian' && <th className="p-5 text-center bg-emerald-50/30">Realisasi</th>}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-50">
+                            {(content.main || []).map((item: any, idx: number) => (
+                              <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
+                                <td className="p-5 font-bold text-gray-700 leading-snug">
+                                  {item.PERENCANAAN_BELAJAR || item.SUB_DIMENSI || item.URAIAN || 'Data tidak tersedia'}
+                                </td>
                                 <td className="p-5 text-center">
-                                  <span className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-black shadow-inner">
-                                    {item.NILAI_REALISASI ?? item.NILAI_CAPAIAN ?? '-'}
+                                  <span className="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl font-black shadow-inner">
+                                    {item.NILAI_TARGET ?? item.TARGET ?? '-'}
                                   </span>
                                 </td>
-                              )}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                                {modalType === 'capaian' && (
+                                  <td className="p-5 text-center">
+                                    <span className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-black shadow-inner">
+                                      {item.NILAI_REALISASI ?? item.NILAI_CAPAIAN ?? '-'}
+                                    </span>
+                                  </td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
-                ))
-              )
+                  ))
+                )
           )}
         </IonContent>
       </IonModal>
