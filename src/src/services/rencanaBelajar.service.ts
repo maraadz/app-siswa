@@ -15,18 +15,18 @@ export const updateCitaCita = async (payload: any) => {
 // 3. Perencanaan Ringkas
 export const getPerencanaan = async () => {
     const res = await api.get('/api/rencana-belajar/perencanaan');
-    return res.data.perencanaan || [];
+    return res.data.perencanaan || res;
 };
 
 // 4. Target & Capaian (POST)
 export const getTargetGrouped = async (payload: any) => {
     const res = await api.post('/api/rencana-belajar/target-grouped', payload);
-    return res.data || {}; // Dokumentasi bilang res.data berisi dimensi
+    return res.data || res; // Dokumentasi bilang res.data berisi dimensi
 };
 
 export const getCapaianGrouped = async (payload: any) => {
     const res = await api.post('/api/rencana-belajar/capaian-grouped', payload);
-    return res.data.grouped || {};
+    return res.data.grouped || res;
 };
 
 // 5. Update Target Batch (Baru)

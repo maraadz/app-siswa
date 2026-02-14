@@ -150,18 +150,48 @@ const RencanaBelajarPage: React.FC<Props> = ({ studentData }) => {
         SEMESTER: Number(p.SEMESTER)
       };
 
-      const response = type === 'rencana'
-        ? await getTargetGrouped(payload)
-        : await getCapaianGrouped(payload);
+      const response =
+        type === 'rencana'
+          ? await getTargetGrouped(payload)
+          : await getCapaianGrouped(payload);
 
-      // Mengambil data murni dari response (biasanya response.data)
-      const dataContent = response.data ? response.data : response;
+      // 🔥 HANDLE SEMUA KEMUNGKINAN STRUKTUR RESPONSE
+      let groupedData: any = null;
 
-      setDetailData({ info: p, data: dataContent });
+      if (response?.data?.grouped) {
+        groupedData = response.data.grouped;
+      } else if (response?.grouped) {
+        groupedData = response.grouped;
+      } else if (response?.data) {
+        groupedData = response.data;
+      } else {
+        groupedData = response;
+      }
+
+      if (!groupedData || Object.keys(groupedData).length === 0) {
+        present({
+          message: 'Data detail belum tersedia',
+          color: 'warning',
+          duration: 2000
+        });
+        return;
+      }
+
+      setDetailData({
+        info: p,
+        data: groupedData
+      });
+
       setModalType(type);
       setShowDetailModal(true);
-    } catch {
-      present({ message: 'Gagal memuat detail perencanaan', color: 'danger', duration: 2000 });
+
+    } catch (err) {
+      console.error(err);
+      present({
+        message: 'Gagal memuat detail perencanaan',
+        color: 'danger',
+        duration: 2000
+      });
     }
   };
 
