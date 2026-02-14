@@ -1,6 +1,3 @@
-## 🛠️ Tech Stack
-Aplikasi ini dibangun menggunakan teknologi mutakhir berbasis **React**:
-
 ## 🛠️ Tech Stack & Framework
 Aplikasi ini menggunakan teknologi terbaru untuk performa maksimal:
 
