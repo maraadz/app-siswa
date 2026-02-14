@@ -2,6 +2,7 @@ interface Column {
   key: string;
   label: string;
   width?: string;
+  render?: (value: any, row: Record<string, any>) => React.ReactNode;
 }
 
 interface DataTableProps {
@@ -42,7 +43,9 @@ export default function DataTable({
               <tr key={i} className="hover:bg-gray-50">
                 {columns.map(col => (
                   <td key={col.key} className="px-4 py-3 text-sm">
-                    {row[col.key]}
+                    {col.render
+                      ? col.render(row[col.key], row)
+                      : row[col.key]}
                   </td>
                 ))}
               </tr>

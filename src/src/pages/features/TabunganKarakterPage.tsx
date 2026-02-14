@@ -1,65 +1,69 @@
-import React from 'react';
+
 import BackButton from '../../components/BackButton';
 import DataTable from '../../components/DataTable';
 import { WalletIcon, TrendingUpIcon } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 export default function TabunganKarakterPage() {
+  const { user } = useAuthStore();
+  const isSMA = [5].includes(Number(user?.idsatuan || user?.IDSATUAN));
   const columns = [
-  {
-    key: 'tanggal',
-    label: 'Tanggal',
-    width: '20%'
-  },
-  {
-    key: 'kegiatan',
-    label: 'Kegiatan',
-    width: '50%'
-  },
-  {
-    key: 'poin',
-    label: 'Poin',
-    width: '15%'
-  },
-  {
-    key: 'total',
-    label: 'Total',
-    width: '15%'
-  }];
+    {
+      key: 'tanggal',
+      label: 'Tanggal',
+      width: '20%'
+    },
+    {
+      key: 'kegiatan',
+      label: 'Kegiatan',
+      width: '50%'
+    },
+    {
+      key: 'poin',
+      label: 'Poin',
+      width: '15%'
+    },
+    {
+      key: 'total',
+      label: 'Total',
+      width: '15%'
+    }];
 
   const data = [
-  {
-    tanggal: '22 Jan 2024',
-    kegiatan: 'Membantu teman',
-    poin: '+10',
-    total: '250'
-  },
-  {
-    tanggal: '20 Jan 2024',
-    kegiatan: 'Datang tepat waktu',
-    poin: '+5',
-    total: '240'
-  },
-  {
-    tanggal: '18 Jan 2024',
-    kegiatan: 'Menjaga kebersihan kelas',
-    poin: '+8',
-    total: '235'
-  },
-  {
-    tanggal: '15 Jan 2024',
-    kegiatan: 'Terlambat',
-    poin: '-5',
-    total: '227'
-  }];
+    {
+      tanggal: '22 Jan 2024',
+      kegiatan: 'Membantu teman',
+      poin: '+10',
+      total: '250'
+    },
+    {
+      tanggal: '20 Jan 2024',
+      kegiatan: 'Datang tepat waktu',
+      poin: '+5',
+      total: '240'
+    },
+    {
+      tanggal: '18 Jan 2024',
+      kegiatan: 'Menjaga kebersihan kelas',
+      poin: '+8',
+      total: '235'
+    },
+    {
+      tanggal: '15 Jan 2024',
+      kegiatan: 'Terlambat',
+      poin: '-5',
+      total: '227'
+    }];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      <BackButton to="/" />
+    <div className="max-w-4xl mx-auto px-4 py-6 pb-20">
+      {/* Jika SMA, balik ke menu Kepengasuhan, jika bukan balik ke Home */}
+      <BackButton to={isSMA ? "/features/kepengasuhan" : "/"} />
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="mb-6 mt-4">
+        <h1 className="text-2xl font-black text-gray-900 mb-1 uppercase tracking-tight">
           Tabungan Karakter
         </h1>
-        <p className="text-gray-600">Poin karakter dan perilaku</p>
+        <p className="text-gray-500 text-sm font-medium">Catatan poin kedisiplinan dan adab ananda</p>
       </div>
 
       {/* Summary Card */}

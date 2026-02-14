@@ -1,4 +1,3 @@
-import React from 'react';
 import { PhoneIcon, MailIcon, UserIcon } from 'lucide-react';
 export default function BantuanPage() {
   const contacts = [

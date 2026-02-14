@@ -1,4 +1,3 @@
-import React from 'react';
 import { PlusIcon, FileIcon, ImageIcon, VideoIcon } from 'lucide-react';
 interface PortofolioPageProps {
   studentName: string;

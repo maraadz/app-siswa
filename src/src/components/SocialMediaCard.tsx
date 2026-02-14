@@ -1,14 +1,14 @@
-import React from 'react';
-import { ExternalLinkIcon, BoxIcon } from 'lucide-react';
+
+import { ExternalLinkIcon } from 'lucide-react';
 interface SocialMediaCardProps {
-  icon: BoxIcon;
+  // icon: BoxIcon;
   title: string;
   color: string;
   thumbnail: string;
   url: string;
 }
 export default function SocialMediaCard({
-  icon: Icon,
+  // icon: Icon,
   title,
   color,
   thumbnail,
@@ -29,7 +29,7 @@ export default function SocialMediaCard({
           <div
             className={`${color} w-10 h-10 rounded-xl flex items-center justify-center`}>
 
-            <Icon className="w-5 h-5 text-white" />
+            {/* <Icon className="w-5 h-5 text-white" /> */}
           </div>
           <span className="font-semibold text-gray-900">{title}</span>
         </div>

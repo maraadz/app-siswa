@@ -1,62 +1,65 @@
 import BackButton from '../../components/BackButton';
 import DataTable from '../../components/DataTable';
 import { TrophyIcon } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 export default function PrestasiSiswaPage() {
+  const { user } = useAuthStore();
+  const isSMA = [5].includes(Number(user?.idsatuan || user?.IDSATUAN));
   const columns = [
-  {
-    key: 'nama',
-    label: 'Nama Siswa',
-    width: '30%'
-  },
-  {
-    key: 'prestasi',
-    label: 'Prestasi',
-    width: '40%'
-  },
-  {
-    key: 'tingkat',
-    label: 'Tingkat',
-    width: '15%'
-  },
-  {
-    key: 'tahun',
-    label: 'Tahun',
-    width: '15%'
-  }];
+    {
+      key: 'nama',
+      label: 'Nama Siswa',
+      width: '30%'
+    },
+    {
+      key: 'prestasi',
+      label: 'Prestasi',
+      width: '40%'
+    },
+    {
+      key: 'tingkat',
+      label: 'Tingkat',
+      width: '15%'
+    },
+    {
+      key: 'tahun',
+      label: 'Tahun',
+      width: '15%'
+    }];
 
   const data = [
-  {
-    nama: 'Ahmad Fauzi',
-    prestasi: 'Juara 1 Olimpiade Matematika',
-    tingkat: 'Provinsi',
-    tahun: '2024'
-  },
-  {
-    nama: 'Fatimah Zahra',
-    prestasi: 'Juara 2 Lomba Tahfidz',
-    tingkat: 'Nasional',
-    tahun: '2024'
-  },
-  {
-    nama: 'Muhammad Ali',
-    prestasi: 'Juara 3 Olimpiade Fisika',
-    tingkat: 'Kota',
-    tahun: '2023'
-  },
-  {
-    nama: 'Aisyah Nur',
-    prestasi: 'Juara 1 Lomba Pidato Bahasa Arab',
-    tingkat: 'Provinsi',
-    tahun: '2023'
-  }];
+    {
+      nama: 'Ahmad Fauzi',
+      prestasi: 'Juara 1 Olimpiade Matematika',
+      tingkat: 'Provinsi',
+      tahun: '2024'
+    },
+    {
+      nama: 'Fatimah Zahra',
+      prestasi: 'Juara 2 Lomba Tahfidz',
+      tingkat: 'Nasional',
+      tahun: '2024'
+    },
+    {
+      nama: 'Muhammad Ali',
+      prestasi: 'Juara 3 Olimpiade Fisika',
+      tingkat: 'Kota',
+      tahun: '2023'
+    },
+    {
+      nama: 'Aisyah Nur',
+      prestasi: 'Juara 1 Lomba Pidato Bahasa Arab',
+      tingkat: 'Provinsi',
+      tahun: '2023'
+    }];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <BackButton to="/" />
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Prestasi Siswa
+        <h1 className="text-2xl font-black text-gray-900 mb-2">
+          {isSMA ? "Tabungan Prestasi" : "Prestasi Siswa"}
         </h1>
         <p className="text-gray-600">Capaian dan penghargaan siswa</p>
       </div>

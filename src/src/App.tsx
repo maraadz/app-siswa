@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { Route, Routes, Navigate, BrowserRouter } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import NotificationPage from './pages/NotificationPage';
+import NotificationHandler from './components/NotificationHandler';
+import PermissionModal from './components/PermissionModal';
 
 // Import Icons
 import { addIcons } from 'ionicons';
@@ -20,6 +22,7 @@ import '@ionic/react/css/typography.css';
 
 // Import Store & Layout
 import { useAuthStore } from './store/authStore';
+import { useFilterStore } from './store/filterStore'; // Import filterStore untuk sinkronisasi
 import Layout from './components/Layout';
 
 // Import Pages
@@ -35,19 +38,25 @@ import RaporPage from './pages/RaporPage';
 import BantuanPage from './pages/BantuanPage';
 import PortofolioPage from './pages/PortofolioPage';
 import ProfilePage from './pages/ProfilePage';
-import KehadiranPage from './pages/features/KehadiranPage';
+import PresensiPage from './pages/features/PresensiPage';
 import RencanaBelajarPage from './pages/features/RencanaBelajarPage';
 import InformasiSekolahPage from './pages/features/InformasiSekolahPage';
 import PrestasiSiswaPage from './pages/features/PrestasiSiswaPage';
 import JadwalPelajaranPage from './pages/features/JadwalPelajaranPage';
 import MajalahPage from './pages/features/MajalahPage';
 import TryOutPage from './pages/features/TryOutPage';
-import KehadiranSiswaPage from './pages/features/KehadiranSiswaPage';
 import KelulusanPage from './pages/features/KelulusanPage';
 import TabunganKarakterPage from './pages/features/TabunganKarakterPage';
 
 // Global Loading Component
 import GlobalLoading from './components/GlobalLoading';
+
+// KEPENGASUHAN
+import KepengasuhanPage from './pages/features/KepengasuhanPage';
+import RiwayatKesehatanPage from './pages/features/RiwayatKesehatanPage';
+import RiwayatKonselingPage from './pages/features/RiwayatKonselingPage';
+import KegiatanSantriPage from './pages/features/KegiatanSantriPage';
+import PerizinanSantriPage from './pages/features/PerizinanSantriPage';
 
 // Registrasi Icon
 addIcons({
@@ -104,10 +113,22 @@ const App: React.FC = () => {
     user
   } = useAuthStore();
 
+  const { initializeFilter } = useFilterStore(); // Ambil fungsi init filter
+
   useEffect(() => {
     // Jalankan inisialisasi saat aplikasi pertama kali dimuat (Cek sesi)
-    initialize();
+    const initApp = async () => {
+      await initialize();
+    };
+    initApp();
   }, [initialize]);
+
+  // Tambahan: Pastikan filter terisi setiap kali user data tersedia (misal setelah refresh)
+  // useEffect(() => {
+  //   if (isAuthenticated && user) {
+  //     initializeFilter(user);
+  //   }
+  // }, [isAuthenticated, user, initializeFilter]);
 
   useEffect(() => {
     // Update CSS Variable untuk tema warna satuan
@@ -140,6 +161,10 @@ const App: React.FC = () => {
       )}
 
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        {/* --- TARO DISINI --- */}
+        <NotificationHandler />
+        <PermissionModal />
+        {/* ------------------- */}
         <IonRouterOutlet>
           <Routes>
             <Route
@@ -165,16 +190,21 @@ const App: React.FC = () => {
                       <Route path="portofolio" element={<PortofolioPage studentName={studentData.name} />} />
                       <Route path="profile" element={<ProfilePage studentData={studentData} onLogout={logout} />} />
                       <Route path="notifications" element={<NotificationPage />} />
-                      <Route path="features/kehadiran" element={<KehadiranPage studentData={studentData} />} />
+                      <Route path="features/kehadiran" element={<PresensiPage />} />
                       <Route path="features/rencana-belajar" element={<RencanaBelajarPage studentData={studentData} />} />
                       <Route path="features/informasi-sekolah" element={<InformasiSekolahPage />} />
                       <Route path="features/prestasi-siswa" element={<PrestasiSiswaPage />} />
                       <Route path="features/jadwal-pelajaran" element={<JadwalPelajaranPage />} />
                       <Route path="features/majalah" element={<MajalahPage />} />
                       <Route path="features/try-out" element={<TryOutPage />} />
-                      <Route path="features/kehadiran-siswa" element={<KehadiranSiswaPage />} />
+                      <Route path="features/kehadiran-siswa" element={<PresensiPage />} />
                       <Route path="features/kelulusan" element={<KelulusanPage />} />
                       <Route path="features/tabungan-karakter" element={<TabunganKarakterPage />} />
+                      <Route path="features/kepengasuhan" element={<KepengasuhanPage />} />
+                      <Route path="features/riwayat-kesehatan" element={<RiwayatKesehatanPage />} />
+                      <Route path="features/riwayat-konseling" element={<RiwayatKonselingPage />} />
+                      <Route path="features/kegiatan-santri" element={<KegiatanSantriPage />} />
+                      <Route path="features/perizinan-santri" element={<PerizinanSantriPage />} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                   </Layout>

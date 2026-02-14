@@ -1,8 +1,24 @@
 import api from '../api/axios';
 
+export const getDaftarTahunAjaran = async () => {
+    try {
+        const res = await api.get('/api/tahun-ajaran?order=desc');
+        return res.data; // Mengembalikan { status: 'ok', data: [...] }
+    } catch (error) {
+        console.error("Gagal ambil tahun ajaran:", error);
+        return null;
+    }
+};
+
 export const getRekapDimensi = async (thn: string | number, smt: string | number, idDimensi: number) => {
+    // Kita kirim id dan sub sekaligus agar sinkron dengan kebutuhan API 
+    // yang terlihat di Postman dan pesan error log.
     const response = await api.get('/api/dimensi/search', {
-        params: { thn, smt, id: idDimensi }
+        params: {
+            thn: thn,
+            smt: smt,
+            id: idDimensi
+        }
     });
     return response.data;
 };
